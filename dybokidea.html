@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Навчання + Автоперевірка + Дошка ідей</title>
+  <style>
+    :root{
+      --bg:#0b0d10; --card:#11151b; --line:#243041;
+      --text:#e9eef6; --muted:#a8b3c2;
+      --accent:#6ee7ff; --ok:#9ff0a8; --bad:#ff9aa2; --warn:#ffd58a;
+      --radius:16px; --shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 620px at 10% -10%, rgba(110,231,255,.14), transparent 55%),
+        radial-gradient(900px 620px at 90% 0%, rgba(167,243,208,.12), transparent 55%),
+        var(--bg);
+      line-height:1.45;
+    }
+    .wrap{max-width:1150px;margin:0 auto;padding:20px}
+    .top{
+      padding:16px;border:1px solid var(--line);border-radius:var(--radius);
+      background: rgba(255,255,255,.03);box-shadow: var(--shadow);
+      display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:flex-start;
+    }
+    h1{margin:0 0 6px; font-size:18px}
+    .sub{margin:0; color:var(--muted); font-size:13.5px; max-width:92ch}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap}
+    .tab{
+      border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03);
+      color:var(--muted); border-radius:999px; padding:8px 10px; font-size:13px;
+      cursor:pointer; user-select:none;
+    }
+    .tab.active{border-color:rgba(110,231,255,.55); color:var(--text)}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03);
+      color:var(--muted); font-size:12.5px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+      font-size:12.5px; color:var(--muted);
+    }
+    .card{
+      border:1px solid rgba(255,255,255,.10); border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      padding:16px; margin-top:12px; box-shadow: 0 10px 22px rgba(0,0,0,.25);
+    }
+    h2{margin:0 0 10px; font-size:16px}
+    h3{margin:0 0 10px; font-size:15px}
+    .muted{color:var(--muted)}
+    .hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
+    .two{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media(max-width:980px){ .two{grid-template-columns:1fr} }
+    label{display:block; margin:8px 0; font-size:14px}
+    input[type="text"], textarea, select{
+      width:100%;
+      background: rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px;
+      font-size:14px;
+      outline:none;
+    }
+    textarea{min-height:90px; resize:vertical}
+    .btn{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding:10px 12px;
+      border-radius:12px;
+      color:var(--text);
+      text-decoration:none;
+      font-weight:800;
+      font-size:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+    }
+    .btn.primary{
+      border-color: rgba(110,231,255,.45);
+      background: linear-gradient(135deg, rgba(110,231,255,.20), rgba(167,243,208,.10));
+    }
+    .btn.danger{border-color: rgba(255,154,162,.45)}
+    .btn:disabled{opacity:.45; cursor:not-allowed}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .q{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      background: rgba(255,255,255,.02);
+      padding:12px;
+      margin:10px 0;
+    }
+    .qt{font-weight:900;margin:0 0 8px}
+    .opt{display:flex; gap:10px; align-items:flex-start; margin:8px 0}
+    .opt input{margin-top:3px}
+    .status.ok{color:var(--ok); font-weight:900}
+    .status.bad{color:var(--bad); font-weight:900}
+    .status.warn{color:var(--warn); font-weight:900}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .hidden{display:none !important}
+    .progress{
+      height:10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+    }
+    .progress > div{height:100%; background: rgba(110,231,255,.35); width:0%}
+    .kpiGrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+    @media(max-width:980px){ .kpiGrid{grid-template-columns:1fr 1fr} }
+    @media(max-width:520px){ .kpiGrid{grid-template-columns:1fr} }
+    .kpi{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      background: rgba(255,255,255,.02);
+      padding:10px;
+    }
+    .kpi .t{margin:0; color:var(--muted); font-size:12px}
+    .kpi .v{margin:6px 0 0; font-weight:1000}
+    .list{margin:8px 0 0; padding-left:18px}
+    .list li{margin:6px 0}
+
+    /* Board */
+    .boardTop{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between}
+    .filters{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .cols{display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-top:10px}
+    @media(max-width:1200px){ .cols{grid-template-columns:repeat(3,1fr)} }
+    @media(max-width:760px){ .cols{grid-template-columns:1fr} }
+    .col{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background: rgba(255,255,255,.02);
+      padding:10px;
+      min-height:220px;
+    }
+    .col h4{margin:0 0 8px; font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:8px}
+    .colCount{font-weight:900; color:var(--text)}
+    .ideaCard{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:12px;
+      padding:10px;
+      background: rgba(255,255,255,.02);
+      margin:8px 0;
+      cursor:pointer;
+    }
+    .ideaTitle{font-weight:900; margin:0 0 6px}
+    .ideaMeta{color:var(--muted); font-size:12px; display:flex; flex-wrap:wrap; gap:8px}
+    .tag{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    /* Modal */
+    .modalBg{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9999;
+    }
+    .modalBg.show{display:flex}
+    .modal{
+      width:min(920px, 100%);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      background: rgba(15,19,24,.98);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .modalHead{display:flex; justify-content:space-between; gap:10px; align-items:flex-start}
+    .modalHead h3{margin:0}
+    .modalClose{cursor:pointer; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); border-radius:12px; padding:8px 10px; color:var(--text); font-weight:900}
+    .toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      background: rgba(15,19,24,.96);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px;
+      border-radius:14px;
+      display:none;
+      gap:10px;
+      align-items:center;
+      box-shadow: var(--shadow);
+      max-width:min(860px, calc(100vw - 24px));
+      z-index:10000;
+    }
+    .toast.show{display:flex}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px rgba(110,231,255,.45)}
+    .hint{font-size:12.5px; color:var(--muted); margin:8px 0 0}
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Навчання + Автоперевірка + Дошка ідей</h1>
+      <p class="sub">
+        “Відправка” працює офлайн: ідеї зберігаються в цьому браузері і переходять по статусах.
+        Є експорт у JSON/CSV.
+      </p>
+      <div class="row" style="margin-top:10px">
+        <span class="badge">✅ Навчання: <b>8/10</b> + практика</span>
+        <span class="badge">🧠 Перевірка: <b>Score 0–100</b></span>
+        <span class="badge">📌 Робота: <b>Дошка статусів</b></span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-view="training">Навчання</div>
+      <div class="tab" data-view="submit">Подача</div>
+      <div class="tab" data-view="board">Дошка ідей</div>
+    </div>
+  </div>
+
+  <!-- TRAINING -->
+  <div id="view_training">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <div>
+          <h2 style="margin:0">Навчання</h2>
+          <p class="muted" style="margin:6px 0 0">Кроки: вступ → правила → тест → практика → результат</p>
+        </div>
+        <div class="pill">Крок <b id="stepNum">1</b>/5</div>
+      </div>
+
+      <div class="hr"></div>
+      <div class="progress"><div id="progBar"></div></div>
+      <div class="hr"></div>
+
+      <div class="step" data-step="1">
+        <h3>1) Вступ</h3>
+        <p class="muted" style="margin:0">
+          Ідеї — це канал покращень: <b>процеси</b>, <b>сервіс</b>, <b>культура</b>, <b>комунікація</b>, <b>навчання</b>, <b>комфорт/безпека</b>.
+        </p>
+        <div class="hr"></div>
+        <p style="margin:0"><b>Формула:</b> Проблема → Рішення → Ефект. <b>1 форма = 1 ідея.</b></p>
+      </div>
+
+      <div class="step hidden" data-step="2">
+        <h3>2) Правила</h3>
+        <div class="two">
+          <div class="q">
+            <p class="qt">Якісна ідея</p>
+            <ul class="muted list">
+              <li>конкретна дія (що змінити)</li>
+              <li>ефект (що стане краще)</li>
+              <li>приклад/доказ (за можливості)</li>
+            </ul>
+          </div>
+          <div class="q">
+            <p class="qt">Що важливо</p>
+            <ul class="muted list">
+              <li>фідбек має бути завжди</li>
+              <li>беклог — нормально</li>
+              <li>впровадження = тест → рішення → масштаб</li>
+            </ul>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <p class="muted" style="margin:0">
+          Автор потрібен для діалогу: уточнення, фідбек, залучення до тесту та визнання внеску.
+        </p>
+      </div>
+
+      <div class="step hidden" data-step="3">
+        <h3>3) Тест (10 питань)</h3>
+        <p class="muted" style="margin:0 0 10px">Прохід: 8/10. Треба відповісти на всі.</p>
+        <div id="quizBox"></div>
+      </div>
+
+      <div class="step hidden" data-step="4">
+        <h3>4) Практика</h3>
+        <div class="two">
+          <div class="q">
+            <p class="qt">Перепиши “погану” ідею</p>
+            <p class="muted" style="margin:0 0 10px">Погано: “Зробіть якось краще, бо постійно плутанина.”</p>
+            <label>Перепиши правильно</label>
+            <textarea id="rewrite1" placeholder="Проблема: ...&#10;Рішення: ...&#10;Ефект: ..."></textarea>
+          </div>
+          <div class="q">
+            <p class="qt">Збери ідею по шаблону</p>
+            <label>Проблема</label>
+            <textarea id="tpl_problem" placeholder="Де виникає і що саме не так"></textarea>
+            <label>Рішення</label>
+            <textarea id="tpl_solution" placeholder="Що конкретно змінити / зробити"></textarea>
+            <label>Ефект</label>
+            <textarea id="tpl_effect" placeholder="Менше помилок / швидше / комфорт / сервіс"></textarea>
+            <label>Докази / приклади</label>
+            <textarea id="tpl_proof" placeholder="Приклад, фото/скрін (опис)"></textarea>
+            <div class="two" style="margin-top:10px">
+              <div>
+                <label>Категорія</label>
+                <select id="cat">
+                  <option value="">— обери —</option>
+                  <option value="Процеси">Процеси</option>
+                  <option value="Культура">Культура</option>
+                  <option value="Комунікація">Комунікація</option>
+                  <option value="Сервіс">Сервіс</option>
+                  <option value="Навчання">Навчання</option>
+                  <option value="Умови/безпека/комфорт">Умови/безпека/комфорт</option>
+                  <option value="Інше">Інше</option>
+                </select>
+              </div>
+              <div>
+                <label>Готовий(а) допомогти з тестом?</label>
+                <select id="help">
+                  <option value="Так">Так</option>
+                  <option value="Ні">Ні</option>
+                </select>
+              </div>
+            </div>
+            <label style="margin-top:10px">Чому ця категорія?</label>
+            <textarea id="catWhy" placeholder="1–2 речення"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="step hidden" data-step="5">
+        <h3>5) Результат</h3>
+        <div class="row">
+          <button class="btn primary" id="calcBtn" type="button">Порахувати</button>
+          <button class="btn" id="copyCodeBtn" type="button" disabled>Скопіювати код</button>
+          <button class="btn" id="gotoSubmitBtn" type="button" disabled>Перейти до подачі</button>
+          <button class="btn danger" id="resetTrainingBtn" type="button">Скинути</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="row" style="margin-bottom:10px">
+          <span class="badge">Тест: <b id="quizScore">—</b></span>
+          <span class="badge">Практика: <b id="practiceScore">—</b></span>
+          <span class="badge">Статус: <b id="finalStatus" class="status">—</b></span>
+        </div>
+
+        <label>Код проходження</label>
+        <input id="passCode" class="mono" type="text" readonly placeholder="—" />
+        <p class="muted" id="finalNote" style="margin:10px 0 0">Натисни “Порахувати”.</p>
+      </div>
+
+      <div class="hr"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn" id="prevBtn" type="button">Назад</button>
+        <button class="btn primary" id="nextBtn" type="button">Далі</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div id="view_submit" class="hidden">
+    <div class="card">
+      <h2>Подача ідеї + Автоперевірка</h2>
+      <p class="muted" style="margin:0 0 10px">
+        Спочатку введи код і натисни “Перевірити код”. Потім “Перевірити ідею” → “Відправити”.
+      </p>
+
+      <div class="q" style="margin-top:0">
+        <p class="qt">Код доступу</p>
+        <div class="two">
+          <div>
+            <label>Код</label>
+            <input id="submitCode" class="mono" type="text" placeholder="IDEA-OK-2025-XXXX" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button class="btn primary" id="checkCodeBtn" type="button">Перевірити код</button>
+          </div>
+        </div>
+        <p class="muted" id="codeCheckNote" style="margin:10px 0 0; font-size:12.5px"></p>
+      </div>
+
+      <div class="q">
+        <p class="qt">Форма ідеї</p>
+
+        <label>Автор (ПІБ або нік)</label>
+        <input id="i_author" type="text" placeholder="Хто подав ідею" />
+
+        <label>Назва</label>
+        <input id="i_title" type="text" placeholder="Коротко і по суті (що змінюємо)" />
+
+        <label>Проблема</label>
+        <textarea id="i_problem" placeholder="Де виникає і що саме не так (конкретно)"></textarea>
+
+        <label>Рішення</label>
+        <textarea id="i_solution" placeholder="Що конкретно зробити: змінити/додати/прибрати/налаштувати..."></textarea>
+
+        <label>Ефект</label>
+        <textarea id="i_effect" placeholder="Що покращиться: час/помилки/гроші/сервіс/комфорт. Бажано цифру/період."></textarea>
+
+        <label>Докази / приклад (бажано)</label>
+        <textarea id="i_proof" placeholder="Приклад ситуації, скрін/фото (опис)"></textarea>
+
+        <div class="two">
+          <div>
+            <label>Категорія</label>
+            <select id="i_cat">
+              <option value="Процеси">Процеси</option>
+              <option value="Культура">Культура</option>
+              <option value="Комунікація">Комунікація</option>
+              <option value="Сервіс">Сервіс</option>
+              <option value="Навчання">Навчання</option>
+              <option value="Умови/безпека/комфорт">Умови/безпека/комфорт</option>
+              <option value="Інше">Інше</option>
+            </select>
+          </div>
+          <div>
+            <label>Підрозділ</label>
+            <input id="i_dept" type="text" placeholder="Салон/Склад/Офіс/..." />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="validateBtn" type="button" disabled>Перевірити ідею</button>
+          <button class="btn" id="sendIdeaBtn" type="button" disabled>Відправити ідею</button>
+          <button class="btn" id="copyIdeaBtn" type="button" disabled>Скопіювати</button>
+          <button class="btn" id="clearIdeaBtn" type="button">Очистити</button>
+        </div>
+
+        <p class="hint">“Відправити” додає ідею в “Дошку ідей”.</p>
+      </div>
+
+      <div class="q">
+        <p class="qt">Результат перевірки</p>
+
+        <div class="kpiGrid">
+          <div class="kpi"><p class="t">Score</p><p class="v" id="v_score">—</p></div>
+          <div class="kpi"><p class="t">Статус</p><p class="v" id="v_status">—</p></div>
+          <div class="kpi"><p class="t">Категорія (AI-lite)</p><p class="v" id="v_guess">—</p></div>
+          <div class="kpi"><p class="t">Рекомендація</p><p class="v" id="v_reco">—</p></div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="two">
+          <div>
+            <p class="qt" style="margin:0 0 8px">✅ Що добре</p>
+            <ul class="list" id="v_good"></ul>
+          </div>
+          <div>
+            <p class="qt" style="margin:0 0 8px">⚠️ Що допрацювати</p>
+            <ul class="list" id="v_fix"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD -->
+  <div id="view_board" class="hidden">
+    <div class="card">
+      <div class="boardTop">
+        <div>
+          <h2 style="margin:0">Дошка ідей</h2>
+          <p class="muted" style="margin:6px 0 0">Клікни по картці — відкриється деталі, статус і коментарі.</p>
+        </div>
+        <div class="filters">
+          <input id="searchBox" type="text" placeholder="Пошук (назва/автор/підрозділ)..." style="min-width:280px" />
+          <select id="filterCat">
+            <option value="">Усі категорії</option>
+            <option>Процеси</option><option>Культура</option><option>Комунікація</option><option>Сервіс</option><option>Навчання</option><option>Умови/безпека/комфорт</option><option>Інше</option>
+          </select>
+          <button class="btn" id="exportJsonBtn" type="button">Експорт JSON</button>
+          <button class="btn" id="exportCsvBtn" type="button">Експорт CSV</button>
+          <button class="btn danger" id="clearAllBtn" type="button">Очистити все</button>
+        </div>
+      </div>
+
+      <div class="cols" id="boardCols"></div>
+      <p class="hint" style="margin-top:10px">Дані зберігаються у твоєму браузері (localStorage). Для командної роботи потрібен сервер/таблиця — зробимо потім.</p>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modalBg" id="modalBg" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Деталі ідеї">
+      <div class="modalHead">
+        <div>
+          <h3 id="m_title">—</h3>
+          <div class="ideaMeta" id="m_meta"></div>
+        </div>
+        <button class="modalClose" id="modalCloseBtn" type="button">Закрити</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="two">
+        <div class="q" style="margin:0">
+          <p class="qt">Опис</p>
+          <div class="muted" style="font-size:12.5px">Проблема</div>
+          <div id="m_problem" style="white-space:pre-wrap"></div>
+          <div class="hr"></div>
+          <div class="muted" style="font-size:12.5px">Рішення</div>
+          <div id="m_solution" style="white-space:pre-wrap"></div>
+          <div class="hr"></div>
+          <div class="muted" style="font-size:12.5px">Ефект</div>
+          <div id="m_effect" style="white-space:pre-wrap"></div>
+          <div class="hr"></div>
+          <div class="muted" style="font-size:12.5px">Докази/приклад</div>
+          <div id="m_proof" style="white-space:pre-wrap"></div>
+        </div>
+
+        <div class="q" style="margin:0">
+          <p class="qt">Робота з ідеєю</p>
+
+          <label>Статус</label>
+          <select id="m_status">
+            <option value="new">Нові</option>
+            <option value="review">На розгляді</option>
+            <option value="backlog">Backlog</option>
+            <option value="test">Тест</option>
+            <option value="done">Впроваджено</option>
+            <option value="rejected">Відхилено</option>
+          </select>
+
+          <label style="margin-top:10px">Відповідальний / рішення</label>
+          <input id="m_owner" type="text" placeholder="Хто веде / що вирішили" />
+
+          <label style="margin-top:10px">Коментар</label>
+          <textarea id="m_comment" placeholder="Коротко: що зроблено / що потрібно уточнити"></textarea>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="m_saveBtn" type="button">Зберегти</button>
+            <button class="btn danger" id="m_deleteBtn" type="button">Видалити</button>
+          </div>
+
+          <div class="hr"></div>
+          <p class="muted" style="margin:0; font-size:12.5px">Історія</p>
+          <div id="m_history" class="muted" style="margin-top:8px; font-size:12.5px; white-space:pre-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="dot" aria-hidden="true"></div>
+    <div id="toastText">Готово</div>
+  </div>
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  // ---------- Helpers ----------
+  const $ = (id)=>document.getElementById(id);
+  const toast = $("toast"), toastText = $("toastText");
+  const nowIso = ()=> new Date().toISOString();
+  const fmtDate = (iso)=>{
+    try{
+      const d = new Date(iso);
+      return d.toLocaleString("uk-UA");
+    }catch{ return iso; }
+  };
+
+  function showToast(t){
+    toastText.textContent = t;
+    toast.classList.add("show");
+    clearTimeout(window.__tt);
+    window.__tt = setTimeout(()=>toast.classList.remove("show"), 2200);
+  }
+  function normalize(s){ return (s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+  function setList(ul, items){
+    ul.innerHTML = "";
+    (items||[]).forEach(t=>{
+      const li=document.createElement("li");
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    if(!(items||[]).length){
+      const li=document.createElement("li");
+      li.textContent = "—";
+      ul.appendChild(li);
+    }
+  }
+  async function copyText(txt){
+    try{ await navigator.clipboard.writeText(txt); }
+    catch{
+      const ta=document.createElement("textarea"); ta.value=txt;
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+    }
+    showToast("Скопійовано");
+  }
+  function genPassCode(){
+    const y=new Date().getFullYear();
+    const r=Math.floor(1000+Math.random()*9000);
+    return `IDEA-OK-${y}-${r}`;
+  }
+
+  // ---------- Tabs ----------
+  const views = { training: $("view_training"), submit: $("view_submit"), board: $("view_board") };
+  document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      tab.classList.add("active");
+      const v=tab.dataset.view;
+      Object.keys(views).forEach(k=>views[k].classList.toggle("hidden", k!==v));
+      if(v==="board") renderBoard();
+    });
+  });
+
+  // ---------- Training Wizard ----------
+  let step = 1;
+  function setStep(n){
+    step = Math.max(1, Math.min(5, n));
+    document.querySelectorAll(".step").forEach(s=>{
+      s.classList.toggle("hidden", Number(s.dataset.step)!==step);
+    });
+    $("stepNum").textContent = String(step);
+    $("progBar").style.width = `${(step-1)/4*100}%`;
+    $("prevBtn").disabled = (step===1);
+    $("nextBtn").textContent = (step===5) ? "Готово" : "Далі";
+  }
+  $("prevBtn").addEventListener("click", ()=>setStep(step-1));
+  $("nextBtn").addEventListener("click", ()=>{
+    if(step===5){ showToast("Натисни “Порахувати”"); return; }
+    setStep(step+1);
+  });
+  setStep(1);
+
+  // ---------- Quiz ----------
+  const PASS_SCORE = 8;
+  const quizQuestions = [
+    {id:"q1", text:"Одна форма = …", options:["Одна ідея","Кілька ідей одразу","Будь-які думки"], correct:0},
+    {id:"q2", text:"Найкращий формат ідеї:", options:["Проблема → Рішення → Ефект","Хочу → зробіть","Скарга"], correct:0},
+    {id:"q3", text:"Ідея може бути про культуру/атмосферу?", options:["Так","Ні"], correct:0},
+    {id:"q4", text:"Ефект потрібен щоб…", options:["оцінити користь","було довше","не потрібно"], correct:0},
+    {id:"q5", text:"Докази/приклади корисні коли…", options:["пояснюють проблему","ніколи","тільки для великих"], correct:0},
+    {id:"q6", text:"Автор вказується щоб…", options:["уточнювати та давати фідбек","карати","байдуже"], correct:0},
+    {id:"q7", text:"3 ідеї в одному описі чи окремо?", options:["Окремо","В одному"], correct:0},
+    {id:"q8", text:"Якщо не підходить зараз:", options:["фідбек + беклог (за потреби)","ігнор","видалити"], correct:0},
+    {id:"q9", text:"Ідеї можуть подавати…", options:["всі працівники","тільки керівники"], correct:0},
+    {id:"q10", text:"Ідеї — це про:", options:["покращення","пошук винних"], correct:0},
+  ];
+  function renderQuiz(){
+    const box = $("quizBox");
+    box.innerHTML = "";
+    quizQuestions.forEach((q, idx)=>{
+      const el=document.createElement("div");
+      el.className="q";
+      el.innerHTML = `
+        <p class="qt">${idx+1}. ${q.text}</p>
+        ${q.options.map((opt,i)=>`
+          <label class="opt">
+            <input type="radio" name="${q.id}" value="${i}">
+            <span>${opt}</span>
+          </label>
+        `).join("")}
+      `;
+      box.appendChild(el);
+    });
+  }
+  renderQuiz();
+  function getRadioValue(name){
+    const el=document.querySelector(`input[name="${name}"]:checked`);
+    return el ? Number(el.value) : null;
+  }
+  function scoreTextTraining(txt){
+    const t=normalize(txt);
+    if(!t) return 0;
+    const hasAction=/(переймен|додат|змін|прибрат|налашт|ввести|оновит|впровад|оптиміз|автоматиз|встанов|перероб)/.test(t);
+    const hasEffect=/(менше|більше|швидше|зменш|покращ|скороч|підвищ|зниз|комфорт|атмосфер|культур|комунікац|сервіс|витрат|помил)/.test(t);
+    const hasStruct=/(проблема:|рішення:|ефект:|пропозиція:)/.test(t);
+    return (hasAction?1:0)+(hasEffect?1:0)+(hasStruct?1:0);
+  }
+
+  // ---------- Auth / Pass Code ----------
+  const LS = {
+    passCode: "ideas_pass_code",
+    passedAt: "ideas_passed_at",
+    ideas: "ideas_board_items_v1"
+  };
+  let savedCode = localStorage.getItem(LS.passCode);
+
+  function isCodeValid(code){
+    const t=(code||"").trim();
+    const formatOk = /^IDEA-OK-\d{4}-\d{4}$/.test(t);
+    if(!formatOk) return false;
+    if(savedCode && t !== savedCode) return false;
+    return true;
+  }
+
+  function calcTraining(){
+    let quizScore=0, answered=0;
+    quizQuestions.forEach(q=>{
+      const v=getRadioValue(q.id);
+      if(v!==null){ answered++; if(v===q.correct) quizScore++; }
+    });
+    const quizOk = (answered===quizQuestions.length) && (quizScore>=PASS_SCORE);
+
+    const r1 = scoreTextTraining($("rewrite1").value);
+    const p = scoreTextTraining("Проблема: "+$("tpl_problem").value);
+    const s = scoreTextTraining("Рішення: "+$("tpl_solution").value);
+    const e = scoreTextTraining("Ефект: "+$("tpl_effect").value);
+
+    const proofLen = normalize($("tpl_proof").value).length;
+    const cat = $("cat").value;
+    const catWhyLen = normalize($("catWhy").value).length;
+
+    const practicePoints =
+      (r1>=2 ? 1 : 0) +
+      ((p+s+e)>=5 ? 1 : 0) +
+      (proofLen>=12 ? 1 : 0) +
+      (cat && catWhyLen>=8 ? 1 : 0);
+
+    const practiceOk = practicePoints>=3;
+    const finalOk = quizOk && practiceOk;
+
+    $("quizScore").textContent = `${quizScore}/${quizQuestions.length}`;
+    $("practiceScore").textContent = practiceOk ? `зарах (${practicePoints}/4)` : `не зарах (${practicePoints}/4)`;
+
+    if(finalOk){
+      const code = genPassCode();
+      savedCode = code;
+      localStorage.setItem(LS.passCode, code);
+      localStorage.setItem(LS.passedAt, nowIso());
+
+      $("finalStatus").textContent = "ПРОЙДЕНО";
+      $("finalStatus").className = "status ok";
+      $("finalNote").textContent = "Готово. Скопіюй код і переходь до подачі.";
+      $("passCode").value = code;
+
+      $("copyCodeBtn").disabled = false;
+      $("gotoSubmitBtn").disabled = false;
+
+      $("submitCode").value = code;
+      $("codeCheckNote").textContent = "Є збережений код. Натисни “Перевірити код”.";
+      showToast("ПРОЙДЕНО. Код збережено.");
+    }else{
+      $("finalStatus").textContent = "НЕ ПРОЙДЕНО";
+      $("finalStatus").className = "status bad";
+      $("finalNote").textContent = "Доопрацюй: відповідай на всі 10 питань + зроби практику конкретнішою.";
+      $("passCode").value = "";
+      $("copyCodeBtn").disabled = true;
+      $("gotoSubmitBtn").disabled = true;
+      showToast("НЕ ПРОЙДЕНО");
+    }
+  }
+
+  $("calcBtn").addEventListener("click", calcTraining);
+  $("copyCodeBtn").addEventListener("click", ()=>copyText($("passCode").value.trim()));
+  $("gotoSubmitBtn").addEventListener("click", ()=>{
+    document.querySelector('.tab[data-view="submit"]').click();
+  });
+  $("resetTrainingBtn").addEventListener("click", ()=>{
+    if(confirm("Скинути проходження в цьому браузері?")){
+      localStorage.removeItem(LS.passCode);
+      localStorage.removeItem(LS.passedAt);
+      savedCode = null;
+
+      $("passCode").value="";
+      $("finalStatus").textContent="—";
+      $("finalStatus").className="status";
+      $("copyCodeBtn").disabled=true;
+      $("gotoSubmitBtn").disabled=true;
+
+      // lock submit
+      $("validateBtn").disabled = true;
+      $("sendIdeaBtn").disabled = true;
+      $("copyIdeaBtn").disabled = true;
+      $("codeCheckNote").textContent = "Спочатку пройди навчання або введи валідний код.";
+      $("codeCheckNote").className = "muted";
+      showToast("Скинуто");
+    }
+  });
+
+  if(savedCode){
+    $("passCode").value = savedCode;
+    $("finalStatus").textContent = "ПРОЙДЕНО (збережено)";
+    $("finalStatus").className = "status ok";
+    $("finalNote").textContent = "Раніше пройдено в цьому браузері. Можеш перейти до подачі.";
+    $("copyCodeBtn").disabled = false;
+    $("gotoSubmitBtn").disabled = false;
+    $("submitCode").value = savedCode;
+    $("codeCheckNote").textContent = "Є збережений код. Натисни “Перевірити код”.";
+  }
+
+  $("checkCodeBtn").addEventListener("click", ()=>{
+    const code = $("submitCode").value.trim();
+    const ok = isCodeValid(code);
+
+    $("validateBtn").disabled = !ok;
+    $("sendIdeaBtn").disabled = true;
+    $("copyIdeaBtn").disabled = true;
+
+    $("codeCheckNote").textContent = ok
+      ? "Код валідний ✅ Тепер натисни “Перевірити ідею”."
+      : "Невірний код або код не збігається з пройденим у цьому браузері.";
+    $("codeCheckNote").className = ok ? "muted status ok" : "muted status bad";
+
+    showToast(ok ? "Код OK" : "Код не пройшов");
+  });
+
+  // ---------- Idea validator ----------
+  const STRICT_GATE_FOR_SEND = true;
+  const MIN_SCORE_OK = 70;
+
+  const ACTION_WORDS = ["змінити","додати","прибрати","видалити","налаштувати","впровадити","створити","перейменувати","оновити","автоматизувати","встановити","ввести","стандартизувати","оптимізувати","узгодити","поправити","переробити","розмістити","позначити","замінити"];
+  const WATER_WORDS = ["якось","постійно","вічно","завжди","ніколи","просто","взагалі","дуже","жесть","погано","незручно","треба щось","зробіть краще"];
+  const CATEGORY_KEYWORDS = {
+    "Процеси": ["процес","регламент","алгоритм","чек","чекліст","крок","оформлен","1с","crm","форма","помилк","шаблон","стандарт","інструкц"],
+    "Комунікація": ["комунікац","передач","домов","узгод","чат","телефон","дзвін","повідомл","відповід","зворотн","фідбек"],
+    "Сервіс": ["клієнт","сервіс","відгук","скарг","консультац","доставка","збірк","гарант","післяпродаж","супровід","привітання"],
+    "Навчання": ["навчан","адаптац","курс","тест","інструктаж","стажув","гід","знання","скрипт"],
+    "Культура": ["культура","атмосфер","повага","цінност","мотивац","команда","конфлікт","етика","взаємодія","підтримка"],
+    "Умови/безпека/комфорт": ["безпек","комфорт","умови","робоче місце","шум","станц","акум","пожеж","інструкц безпек","зона","порядок"]
+  };
+
+  function countMatches(text, arr){
+    const t = normalize(text); let c=0; arr.forEach(w=>{ if(t.includes(w)) c++; }); return c;
+  }
+  function hasMetric(text){
+    const t = normalize(text);
+    return (/\d/.test(t) && (/%|грн|₴|хв|год|дн|день|раз|шт/.test(t)));
+  }
+  function guessCategory(allText){
+    const t = normalize(allText);
+    let best = {cat:"Інше", score:0};
+    Object.keys(CATEGORY_KEYWORDS).forEach(cat=>{
+      const score = CATEGORY_KEYWORDS[cat].reduce((acc,kw)=> acc + (t.includes(kw)?1:0), 0);
+      if(score > best.score) best = {cat, score};
+    });
+    return best;
+  }
+
+  function validateIdea(){
+    const author = ($("i_author").value||"").trim();
+    const title = ($("i_title").value||"").trim();
+    const problem = ($("i_problem").value||"").trim();
+    const solution = ($("i_solution").value||"").trim();
+    const effect = ($("i_effect").value||"").trim();
+    const proof = ($("i_proof").value||"").trim();
+    const cat = $("i_cat").value;
+    const dept = ($("i_dept").value||"").trim();
+
+    const allText = `${author}\n${title}\n${problem}\n${solution}\n${effect}\n${proof}\n${dept}\n${cat}`;
+    const good = [];
+    const fix = [];
+
+    const gate = {
+      title: title.length >= 6,
+      problem: problem.length >= 25,
+      solution: solution.length >= 20,
+      effect: effect.length >= 15,
+      author: author.length >= 2,
+      dept: dept.length >= 2
+    };
+
+    let score = 0;
+
+    // Structure 45
+    if(gate.author){ score += 5; good.push("Автор вказаний"); } else fix.push("Вкажи автора (ПІБ або нік)");
+    if(gate.title){ score += 8; good.push("Назва конкретна"); } else fix.push("Зроби назву конкретнішою (краще почати з дії)");
+    if(gate.problem){ score += 12; good.push("Проблема описана"); } else fix.push("Опиши проблему конкретніше (де/коли/що) — мін. 25 символів");
+    if(gate.solution){ score += 12; good.push("Рішення описане"); } else fix.push("Опиши рішення конкретніше — мін. 20 символів");
+    if(gate.effect){ score += 8; good.push("Ефект вказаний"); } else fix.push("Додай ефект — мін. 15 символів");
+
+    // Action 15
+    const actionCount = countMatches(solution, ACTION_WORDS);
+    if(actionCount >= 1){ score += 10; good.push("Є конкретна дія в рішенні"); }
+    else fix.push("Почни рішення з дієслова: змінити/додати/прибрати/налаштувати/впровадити…");
+    if(actionCount >= 2){ score += 5; good.push("Рішення деталізоване (кілька дій)"); }
+
+    // Metrics 15
+    if(hasMetric(effect) || hasMetric(problem)){ score += 15; good.push("Є вимірюваність/метрика"); }
+    else fix.push("Додай метрику: цифра/час/%/грн (на скільки стане краще)");
+
+    // Proof 10
+    if(normalize(proof).length >= 15){ score += 10; good.push("Є приклад/доказ"); }
+    else fix.push("Додай приклад/опис ситуації або скріну (бажано)");
+
+    // Dept 5
+    if(gate.dept){ score += 5; good.push("Вказано підрозділ/контекст"); }
+    else fix.push("Вкажи підрозділ (салон/склад/офіс…)");
+
+    // Water penalty
+    const waterCount = countMatches(allText, WATER_WORDS);
+    if(waterCount >= 2){ score -= 8; fix.push("Забагато 'води' — заміни на факти/приклади"); }
+    else if(waterCount === 1){ score -= 4; fix.push("Є 'вода' — спробуй конкретизувати"); }
+    else good.push("Формулювання без 'води'");
+
+    // Category match 10
+    const guessed = guessCategory(allText);
+    if(guessed.score > 0){
+      if(guessed.cat === cat){ score += 10; good.push("Категорія відповідає тексту"); }
+      else { score += 3; fix.push(`Категорія може бути іншою: алгоритм думає "${guessed.cat}"`); }
+    }
+
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
+    const mandatoryOk = gate.author && gate.title && gate.problem && gate.solution && gate.effect && gate.dept;
+    let statusText = "Потрібно допрацювати";
+    let statusClass = "status bad";
+    let reco = "Доопрацюй за підказками і перевір ще раз";
+
+    if(mandatoryOk && score >= MIN_SCORE_OK){
+      statusText = "Готово до подачі";
+      statusClass = "status ok";
+      reco = "Можна відправляти в роботу";
+    } else if(mandatoryOk && score >= 55){
+      statusText = "Майже готово";
+      statusClass = "status warn";
+      reco = "Додай конкретику/метрику — і буде супер";
+    }
+
+    $("v_score").textContent = `${score}/100`;
+    $("v_status").textContent = statusText;
+    $("v_status").className = statusClass;
+    $("v_guess").textContent = guessed.score>0 ? guessed.cat : "—";
+    $("v_reco").textContent = reco;
+
+    setList($("v_good"), good);
+    setList($("v_fix"), fix);
+
+    // enable actions
+    const canSend = STRICT_GATE_FOR_SEND ? (mandatoryOk && score >= MIN_SCORE_OK) : mandatoryOk;
+    $("sendIdeaBtn").disabled = !canSend;
+    $("copyIdeaBtn").disabled = !mandatoryOk;
+
+    showToast(`Перевірка: ${score}/100`);
+    return {score, mandatoryOk, canSend, guessed: guessed.cat};
+  }
+
+  $("validateBtn").addEventListener("click", ()=>{
+    if($("validateBtn").disabled){
+      alert("Спочатку натисни “Перевірити код”.");
+      return;
+    }
+    validateIdea();
+  });
+
+  // ---------- Board storage ----------
+  function loadIdeas(){
+    try{
+      const raw = localStorage.getItem(LS.ideas);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch{ return []; }
+  }
+  function saveIdeas(arr){
+    localStorage.setItem(LS.ideas, JSON.stringify(arr || []));
+  }
+  function newIdeaId(){
+    return "idea_" + Math.random().toString(16).slice(2) + "_" + Date.now();
+  }
+
+  function buildIdeaTextForCopy(idea){
+    return `ID: ${idea.id}
+СТАТУС: ${statusLabel(idea.status)}
+СТВОРЕНО: ${fmtDate(idea.createdAt)}
+КОД НАВЧАННЯ: ${idea.trainingCode}
+
+АВТОР: ${idea.author}
+ПІДРОЗДІЛ: ${idea.dept}
+КАТЕГОРІЯ: ${idea.cat}
+
+НАЗВА: ${idea.title}
+
+ПРОБЛЕМА:
+${idea.problem}
+
+РІШЕННЯ:
+${idea.solution}
+
+ЕФЕКТ:
+${idea.effect}
+
+ДОКАЗИ / ПРИКЛАД:
+${idea.proof || "—"}
+
+SCORE: ${idea.score}/100
+AI-LITE: ${idea.guessedCat || "—"}
+
+ВІДПОВІДАЛЬНИЙ/РІШЕННЯ: ${idea.owner || "—"}
+КОМЕНТАР: ${idea.comment || "—"}`;
+  }
+
+  // send idea (to board)
+  $("sendIdeaBtn").addEventListener("click", ()=>{
+    const code = ($("submitCode").value||"").trim();
+    if(!isCodeValid(code)){
+      alert("Невірний код. Натисни “Перевірити код”.");
+      return;
+    }
+
+    const v = validateIdea();
+    if(STRICT_GATE_FOR_SEND && !v.canSend){
+      alert("Ідея не проходить перевірку (мін. 70/100 + обовʼязкові поля).");
+      return;
+    }
+
+    const idea = {
+      id: newIdeaId(),
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      trainingCode: code,
+      status: "new",
+      author: ($("i_author").value||"").trim(),
+      dept: ($("i_dept").value||"").trim(),
+      cat: $("i_cat").value,
+      title: ($("i_title").value||"").trim(),
+      problem: ($("i_problem").value||"").trim(),
+      solution: ($("i_solution").value||"").trim(),
+      effect: ($("i_effect").value||"").trim(),
+      proof: ($("i_proof").value||"").trim(),
+      score: parseInt(($("v_score").textContent||"0").split("/")[0], 10) || 0,
+      guessedCat: $("v_guess").textContent || "",
+      owner: "",
+      comment: "",
+      history: [`${fmtDate(nowIso())} — Створено (статус: Нові)`]
+    };
+
+    const ideas = loadIdeas();
+    ideas.unshift(idea);
+    saveIdeas(ideas);
+
+    showToast("Ідею відправлено ✅");
+    // go to board
+    document.querySelector('.tab[data-view="board"]').click();
+  });
+
+  $("copyIdeaBtn").addEventListener("click", async ()=>{
+    const code = ($("submitCode").value||"").trim();
+    const idea = {
+      id:"—",
+      createdAt: nowIso(),
+      trainingCode: code,
+      status:"new",
+      author: ($("i_author").value||"").trim() || "—",
+      dept: ($("i_dept").value||"").trim() || "—",
+      cat: $("i_cat").value,
+      title: ($("i_title").value||"").trim(),
+      problem: ($("i_problem").value||"").trim(),
+      solution: ($("i_solution").value||"").trim(),
+      effect: ($("i_effect").value||"").trim(),
+      proof: ($("i_proof").value||"").trim(),
+      score: parseInt(($("v_score").textContent||"0").split("/")[0], 10) || 0,
+      guessedCat: $("v_guess").textContent || "—",
+      owner:"",
+      comment:""
+    };
+    await copyText(buildIdeaTextForCopy(idea));
+  });
+
+  $("clearIdeaBtn").addEventListener("click", ()=>{
+    ["i_author","i_title","i_problem","i_solution","i_effect","i_proof","i_dept"].forEach(id=>$(id).value="");
+    $("sendIdeaBtn").disabled = true;
+    $("copyIdeaBtn").disabled = true;
+    $("v_score").textContent="—";
+    $("v_status").textContent="—";
+    $("v_status").className="v";
+    $("v_guess").textContent="—";
+    $("v_reco").textContent="—";
+    setList($("v_good"), []);
+    setList($("v_fix"), []);
+    showToast("Очищено");
+  });
+
+  // enable validate only after code check ok
+  $("validateBtn").disabled = true;
+  $("sendIdeaBtn").disabled = true;
+  $("copyIdeaBtn").disabled = true;
+
+  // if saved code exists, prefill
+  if(savedCode){
+    $("submitCode").value = savedCode;
+    $("codeCheckNote").textContent = "Є збережений код. Натисни “Перевірити код”.";
+  }
+
+  // ---------- Board ----------
+  const STATUSES = [
+    {key:"new", label:"Нові"},
+    {key:"review", label:"На розгляді"},
+    {key:"backlog", label:"Backlog"},
+    {key:"test", label:"Тест"},
+    {key:"done", label:"Впроваджено"},
+    {key:"rejected", label:"Відхилено"},
+  ];
+  const statusLabel = (k)=> (STATUSES.find(x=>x.key===k)?.label) || k;
+
+  function matchesFilters(idea){
+    const q = normalize($("searchBox")?.value || "");
+    const cat = $("filterCat")?.value || "";
+    const hay = normalize(`${idea.title} ${idea.author} ${idea.dept} ${idea.cat} ${idea.problem} ${idea.solution}`);
+    const okQ = !q || hay.includes(q);
+    const okC = !cat || idea.cat === cat;
+    return okQ && okC;
+  }
+
+  function renderBoard(){
+    const host = $("boardCols");
+    if(!host) return;
+
+    const ideas = loadIdeas().filter(matchesFilters);
+
+    host.innerHTML = "";
+    STATUSES.forEach(s=>{
+      const col = document.createElement("div");
+      col.className = "col";
+      const items = ideas.filter(i=>i.status===s.key);
+      col.innerHTML = `<h4><span>${s.label}</span><span class="colCount">${items.length}</span></h4><div class="colBody"></div>`;
+      const body = col.querySelector(".colBody");
+
+      items.forEach(it=>{
+        const card = document.createElement("div");
+        card.className = "ideaCard";
+        card.dataset.id = it.id;
+        card.innerHTML = `
+          <div class="ideaTitle">${escapeHtml(it.title || "—")}</div>
+          <div class="ideaMeta">
+            <span class="tag">Score: ${it.score || 0}</span>
+            <span class="tag">${escapeHtml(it.cat || "—")}</span>
+            <span class="tag">${escapeHtml(it.author || "—")}</span>
+          </div>
+          <div class="ideaMeta" style="margin-top:6px">
+            <span class="tag">${escapeHtml(it.dept || "—")}</span>
+            <span class="tag">${escapeHtml(fmtDate(it.createdAt))}</span>
+          </div>
+        `;
+        card.addEventListener("click", ()=>openModal(it.id));
+        body.appendChild(card);
+      });
+
+      host.appendChild(col);
+    });
+  }
+
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+  }
+
+  $("searchBox")?.addEventListener("input", renderBoard);
+  $("filterCat")?.addEventListener("change", renderBoard);
+
+  // Export JSON
+  $("exportJsonBtn")?.addEventListener("click", async ()=>{
+    const ideas = loadIdeas();
+    const blob = new Blob([JSON.stringify(ideas, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    download(url, `ideas_export_${Date.now()}.json`);
+    showToast("Експорт JSON");
+  });
+
+  // Export CSV (simple)
+  $("exportCsvBtn")?.addEventListener("click", ()=>{
+    const ideas = loadIdeas();
+    const cols = ["id","status","createdAt","updatedAt","score","cat","guessedCat","author","dept","title","problem","solution","effect","proof","owner","comment","trainingCode"];
+    const esc = (v)=> `"${String(v ?? "").replace(/"/g,'""')}"`;
+    const lines = [
+      cols.join(","),
+      ...ideas.map(i=>cols.map(c=>esc(i[c])).join(","))
+    ];
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    download(url, `ideas_export_${Date.now()}.csv`);
+    showToast("Експорт CSV");
+  });
+
+  $("clearAllBtn")?.addEventListener("click", ()=>{
+    if(confirm("Точно очистити всі ідеї на дошці? (лише в цьому браузері)")){
+      localStorage.removeItem(LS.ideas);
+      renderBoard();
+      showToast("Очищено");
+    }
+  });
+
+  function download(url, filename){
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+
+  // ---------- Modal ----------
+  let activeId = null;
+
+  function openModal(id){
+    const ideas = loadIdeas();
+    const it = ideas.find(x=>x.id===id);
+    if(!it) return;
+
+    activeId = id;
+    $("modalBg").classList.add("show");
+    $("modalBg").setAttribute("aria-hidden","false");
+
+    $("m_title").textContent = it.title || "—";
+    $("m_meta").innerHTML = `
+      <span class="tag">${escapeHtml(statusLabel(it.status))}</span>
+      <span class="tag">Score: ${it.score || 0}</span>
+      <span class="tag">${escapeHtml(it.cat || "—")}</span>
+      <span class="tag">${escapeHtml(it.author || "—")}</span>
+      <span class="tag">${escapeHtml(it.dept || "—")}</span>
+      <span class="tag">${escapeHtml(fmtDate(it.createdAt))}</span>
+    `;
+
+    $("m_problem").textContent = it.problem || "—";
+    $("m_solution").textContent = it.solution || "—";
+    $("m_effect").textContent = it.effect || "—";
+    $("m_proof").textContent = it.proof || "—";
+
+    $("m_status").value = it.status;
+    $("m_owner").value = it.owner || "";
+    $("m_comment").value = it.comment || "";
+
+    $("m_history").textContent = (it.history || []).join("\n");
+  }
+
+  function closeModal(){
+    activeId = null;
+    $("modalBg").classList.remove("show");
+    $("modalBg").setAttribute("aria-hidden","true");
+  }
+  $("modalCloseBtn").addEventListener("click", closeModal);
+  $("modalBg").addEventListener("click", (e)=>{ if(e.target.id==="modalBg") closeModal(); });
+
+  $("m_saveBtn").addEventListener("click", ()=>{
+    if(!activeId) return;
+    const ideas = loadIdeas();
+    const idx = ideas.findIndex(x=>x.id===activeId);
+    if(idx<0) return;
+
+    const before = ideas[idx];
+    const newStatus = $("m_status").value;
+    const owner = ($("m_owner").value||"").trim();
+    const comment = ($("m_comment").value||"").trim();
+
+    const hist = Array.isArray(before.history) ? before.history.slice() : [];
+    const changes = [];
+    if(before.status !== newStatus) changes.push(`статус: ${statusLabel(before.status)} → ${statusLabel(newStatus)}`);
+    if((before.owner||"") !== owner) changes.push(`відповідальний/рішення: "${before.owner||"—"}" → "${owner||"—"}"`);
+    if((before.comment||"") !== comment) changes.push(`коментар оновлено`);
+
+    if(changes.length){
+      hist.push(`${fmtDate(nowIso())} — ${changes.join(", ")}`);
+    }
+
+    ideas[idx] = {
+      ...before,
+      status: newStatus,
+      owner,
+      comment,
+      history: hist,
+      updatedAt: nowIso()
+    };
+    saveIdeas(ideas);
+
+    showToast("Збережено");
+    // refresh modal view + board
+    openModal(activeId);
+    renderBoard();
+  });
+
+  $("m_deleteBtn").addEventListener("click", ()=>{
+    if(!activeId) return;
+    if(!confirm("Видалити цю ідею?")) return;
+    const ideas = loadIdeas().filter(x=>x.id!==activeId);
+    saveIdeas(ideas);
+    closeModal();
+    renderBoard();
+    showToast("Видалено");
+  });
+
+});
+</script>
+</body>
+</html>
